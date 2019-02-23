@@ -38,9 +38,10 @@
     "@types/babel-types": "^7.0.5",
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.4",
-    "coveralls": "^3.0.3"
-  },
-  "dependencies": {
+    "coveralls": "^3.0.3",
     "jest": "^24.1.0"
+  },
+  "peerDependencies": {
+    "@babel/core": "^7.0.0-0"
   }
 }
