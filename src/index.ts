@@ -1,18 +1,9 @@
-import { PluginObj, types as Types } from "@babel/core"
-import { NodePath } from "@babel/traverse"
+import { PluginObj, types as Types } from "babel-core"
+import { NodePath } from "babel-traverse"
 
 interface Arguments
 {
     types: typeof Types
-}
-
-const identify = {
-    Identifier(path) {
-        console.log("======== TRAVERSING: " + path.node.name + " ============");
-    },
-    AssignmentPattern(path) {
-        console.log('Assignment: ' + path.node.name)
-    }
 }
 
 const isDeclaration = (path: NodePath): boolean =>
@@ -40,8 +31,6 @@ const debug = (node: NodePath) =>
     }
 }
 
-const testVars = /^TEST([a-z0-9_\-])*$/i
-
 interface PluginOptions
 {
     [key: string]: any
@@ -53,14 +42,14 @@ const pluginOptionsIncludeKey = (key: string|number, options: PluginOptions): ke
 {
     if (pluginOptions !== options) {
         pluginOptions = options
-        pluginOptionKeys = Object.keys(options)
+        pluginOptionKeys = Object.keys(options).filter(key => key !== '_debug')
     }
 
     return pluginOptionKeys.includes(key as string)
 }
 
 
-const Plugin: ((babel: Arguments) => PluginObj) = ({ types }) =>
+const Plugin: ((babel: Arguments) => PluginObj) = () =>
 {
     return {
         name: 'transform-define',
@@ -72,45 +61,55 @@ const Plugin: ((babel: Arguments) => PluginObj) = ({ types }) =>
                 if (pluginOptionsIncludeKey(path.node.name, opts)) {
                     const replacement = pluginOptions[path.node.name]
 
-                    if (isDeclaration(path) && path.isIdentifier() && path.isReferenced()) {
-                        path.replaceWithSourceString(JSON.stringify(replacement))
-                    }
-                }
-
-                if (testVars.test(path.node.name)) {
-                    console.log('==================')
-
-
-                    if (isDeclaration(path) && path.isIdentifier() && path.isReferenced()) {
+                    if (opts._debug) {
                         console.log({
-                            replace: path.parentPath.getSource(),
-                            self: path.getSource(),
-                            type: path.type,
-                            parentType: path.parentPath.type,
-                            parentParentType: path.parentPath.parentPath.type,
-                            parentParentParentType: path.parentPath.parentPath.parentPath.type,
-                            opts
+                            variable: path.node.name,
+                            source: path.parentPath.getSource(),
+                            value: path.evaluate().value,
+                            ...debug(path)
                         })
+                    }
+
+                    if (isDeclaration(path) && path.isReferenced() && path.evaluate().value === undefined) {
+                        path.replaceWithSourceString(JSON.stringify(replacement))
                         return
                     }
-
-                    // else {
-                        console.log({
-                            source: path.parentPath.getSource(),
-                            self: debug(path),
-                            // parent: debug(path.parentPath)
-                        })
-                    // }
-
-
-                    // const parentPath = node
-                    // if (parentPath.isVariableDeclarator()) {
-                    //     console.log('What the?', path.parent.type)
-                    // }
-                    // node.isDeclaration()
-                    // console.log('DOOOOO STUFF: ' + node.type)
-                    // path.traverse(identify)
                 }
+
+                // if (testVars.test(path.node.name)) {
+                //     console.log('==================')
+                //
+                //
+                //     if (isDeclaration(path) && path.isIdentifier() && path.isReferenced()) {
+                //         console.log({
+                //             replace: path.parentPath.getSource(),
+                //             self: path.getSource(),
+                //             type: path.type,
+                //             parentType: path.parentPath.type,
+                //             parentParentType: path.parentPath.parentPath.type,
+                //             parentParentParentType: path.parentPath.parentPath.parentPath.type,
+                //             opts
+                //         })
+                //         return
+                //     }
+                //
+                //     // else {
+                //         console.log({
+                //             source: path.parentPath.getSource(),
+                //             self: debug(path),
+                //             // parent: debug(path.parentPath)
+                //         })
+                //     // }
+                //
+                //
+                //     // const parentPath = node
+                //     // if (parentPath.isVariableDeclarator()) {
+                //     //     console.log('What the?', path.parent.type)
+                //     // }
+                //     // node.isDeclaration()
+                //     // console.log('DOOOOO STUFF: ' + node.type)
+                //     // path.traverse(identify)
+                // }
             },
             // Declaration(path) {
                 // console.log('We have a declaration ' + path.node.type)
