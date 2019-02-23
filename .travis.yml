@@ -7,4 +7,4 @@ script:
   - npm test
 
 after_success:
-  - "node ./node_modules/.bin/coveralls.js < coverage/lcov.info"
+  - "node ./node_modules/.bin/coveralls < coverage/lcov.info"
