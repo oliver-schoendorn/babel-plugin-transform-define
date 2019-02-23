@@ -1,3 +1,10 @@
 language: node_js
+
+install:
+  - npm i
+
+script:
+  - npm test
+
 after_success:
   - "node ./node_modules/.bin/coveralls.js < coverage/lcov.info"
