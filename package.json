@@ -2,7 +2,11 @@
   "name": "@oliver-schoendorn/babel-plugin-transform-define",
   "version": "1.0.0",
   "description": "",
-  "keywords": [ "babel", "plugin", "define" ],
+  "keywords": [
+    "babel",
+    "plugin",
+    "define"
+  ],
   "main": "dist/index.js",
   "scripts": {
     "build": "babel ./src/index.ts -d dist --extensions \".ts\"",
@@ -34,7 +38,9 @@
     "@babel/core": "^7.3.3",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.3.3",
+    "@babel/traverse": "^7.2.3",
     "@types/babel-core": "^6.25.6",
+    "@types/babel-traverse": "^6.25.5",
     "@types/babel-types": "^7.0.5",
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.4",

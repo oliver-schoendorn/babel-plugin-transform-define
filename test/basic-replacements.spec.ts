@@ -1,4 +1,4 @@
-import { transform as babelTransform } from "babel-core"
+import { transform as babelTransform } from "@babel/core"
 
 const transform = (sourceCode: string, replacements: { [key: string]: any }): string =>
     babelTransform(sourceCode, { plugins: [ [ './dist/index.js', replacements] ] }).code

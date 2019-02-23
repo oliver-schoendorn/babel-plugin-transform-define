@@ -1,6 +1,5 @@
-import { PluginObj, types as Types } from "babel-core"
-import { NodePath } from "babel-traverse"
-import { isVariableDeclarator } from "babel-types"
+import { PluginObj, types as Types } from "@babel/core"
+import { NodePath } from "@babel/traverse"
 
 interface Arguments
 {
