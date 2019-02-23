@@ -1,0 +1,17 @@
+{
+  "presets": [
+    "@babel/typescript",
+    ["@babel/env", {
+      "targets": { "node": "current" }
+    }]
+  ],
+  "compact": true,
+  "comments": false,
+  "env": {
+    "test": {
+      "sourceMaps": "inline",
+      "compact": false,
+      "comments": true
+    }
+  }
+}

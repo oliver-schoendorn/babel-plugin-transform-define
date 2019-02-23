@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "es6",
+    "baseUrl": "./src",
+    "outFile": "./dist/index.js",
+    "moduleResolution": "node",
+    "module": "none",
+    "noEmit": true,
+//    "sourceMap": true,
+    "inlineSourceMap": true,
+    "inlineSources": true
+  },
+  "include": [ "./src/**/*" ]
+}

@@ -1,0 +1,46 @@
+{
+  "name": "@oliver-schoendorn/babel-plugin-transform-define",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [ "babel", "plugin", "define" ],
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel ./src/index.ts -d dist --extensions \".ts\"",
+    "test": "NODE_ENV=test npm run build && jest --coverage"
+  },
+  "author": "Oliver Schöndorn <info@oswebstyle.de>",
+  "license": "MIT",
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "js",
+      "json"
+    ],
+    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.tsx?$",
+    "transform": {
+      "^.+\\.tsx?$": "babel-jest"
+    },
+    "coverageDirectory": "./coverage",
+    "collectCoverageFrom": [
+      "./dist/**/*.{js,ts}",
+      "!**/node_modules/**"
+    ],
+    "globals": {
+      "NODE_ENV": "test"
+    }
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.3.3",
+    "@babel/preset-env": "^7.3.1",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/babel-core": "^6.25.6",
+    "@types/babel-types": "^7.0.5",
+    "@types/jest": "^24.0.6",
+    "@types/node": "^11.9.4",
+    "coveralls": "^3.0.3"
+  },
+  "dependencies": {
+    "jest": "^24.1.0"
+  }
+}
