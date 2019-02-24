@@ -13,7 +13,7 @@ Todo: Write documentation
 {
     "plugins": [
         [ "@oliver-schoendorn/babel-plugin-transform-define", {
-            CONFIG: { "your": "values" } 
+            "CONFIG": { "your": "values" } 
         } ]
     ]
 }
