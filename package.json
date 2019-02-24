@@ -1,6 +1,6 @@
 {
   "name": "@oliver-schoendorn/babel-plugin-transform-define",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "",
   "keywords": [
     "babel",
@@ -9,7 +9,8 @@
   ],
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel ./src/index.ts -d dist --extensions \".ts\"",
+    "build": "babel ./src -d ./dist --extensions \".ts\"",
+    "build:dev": "NODE_ENV=test npm run build",
     "test": "NODE_ENV=test npm run build && jest --coverage"
   },
   "author": "Oliver Schöndorn <info@oswebstyle.de>",
@@ -20,13 +21,13 @@
       "js",
       "json"
     ],
-    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.tsx?$",
+    "testRegex": "(/test/.*\\.(test|spec))\\.ts$",
     "transform": {
       "^.+\\.tsx?$": "babel-jest"
     },
     "coverageDirectory": "./coverage",
     "collectCoverageFrom": [
-      "./dist/**/*.{js,ts}",
+      "./dist/**/*.js",
       "!**/node_modules/**"
     ],
     "globals": {
@@ -36,6 +37,8 @@
   "devDependencies": {
     "@babel/cli": "^7.2.3",
     "@babel/core": "^7.3.3",
+    "@babel/plugin-proposal-class-properties": "^7.3.3",
+    "@babel/polyfill": "^7.2.5",
     "@babel/preset-env": "^7.3.1",
     "@babel/preset-typescript": "^7.3.3",
     "@babel/traverse": "^7.2.3",
@@ -45,7 +48,8 @@
     "@types/jest": "^24.0.6",
     "@types/node": "^11.9.4",
     "coveralls": "^3.0.3",
-    "jest": "^24.1.0"
+    "jest": "^24.1.0",
+    "uuid": "^3.3.2"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.0-0"

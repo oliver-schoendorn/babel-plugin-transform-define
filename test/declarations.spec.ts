@@ -1,18 +1,16 @@
-import { transform as babelTransform } from "@babel/core"
+import { transform, concat } from './helpers'
 
-const transform = (sourceCode: string, replacements: { [key: string]: any }, debug: boolean = false): string =>
-    babelTransform(sourceCode, { plugins: [
-        [ './dist/index.js', Object.assign({}, replacements, { _debug: debug ? true : undefined }) ]
-    ] }).code
-
-const concat = (sourceCode: string): string =>
-    sourceCode.replace(/^\s+|(\r\n|\n)/gm, '').replace(';', ';\n')
-
-describe('Basic replacements', function () {
+describe('Declaration Tests', function () {
     it('should replace basic declaration', function () {
         const replacements = { TEST_VAR: 'foo' }
-        const result = transform(`const test = TEST_VAR`, replacements, true)
+        const result = transform(`const test = TEST_VAR`, replacements)
         expect(result).toContain(`const test = ${JSON.stringify(replacements.TEST_VAR)}`)
+    })
+
+    it('should handle chained declarations', function () {
+        const replacements = { TEST_VAR: 'foo' }
+        const result = transform(`const test = foo = TEST_VAR`, replacements)
+        expect(result).toContain(`const test = foo = ${JSON.stringify(replacements.TEST_VAR)}`)
     })
 
     it('should handle primitive replacements', function () {
@@ -62,11 +60,43 @@ describe('Basic replacements', function () {
 
         const result = concat(transform(code, replacements))
         expect(result).toContain(
-            'const myObject = {"TRUE": true,"FALSE": false,"INT": -123,"STRING": "bar","NULL": null};'
+            'const myObject = {"TRUE": true,"FALSE": false,"INT": -123,"STRING": "bar","NULL": null,' +
+                '"UNDEFINED": undefined};'
         )
         expect(result).toContain(
             'const myArray = ["foo", "bar", 123, true, false, null];'
         )
+    })
+
+    it('should handle spreads', function () {
+        const result = concat(transform(`
+                const VAR = { some: 'thing' }
+                const foo = { baz: 'bar', ...TEST, ...VAR }
+            `,
+            { TEST: { variable: 'string' }, VAR: { lol: true } }
+        ))
+
+        expect(result).toContain(`const foo = {baz: 'bar',...{"variable": "string"},...VAR};`)
+    })
+
+    it('should handle member expressions', function () {
+        const result = concat(transform(
+            `const foo = process.env.FOO`,
+            { 'process.env.FOO': 'bar'}
+        ))
+
+        expect(result).toContain(`const foo = "bar";`)
+    })
+
+    it('should not handle defined member expressions', function () {
+        const result = concat(transform(`
+                const process = { env: { Foo: 'foo' } }
+                const foo = process.env.FOO
+            `,
+            { 'process.env.FOO': 'bar'}
+        ))
+
+        expect(result).toContain(`const foo = "bar";`)
     })
 
     it('should not replace assignment', function () {
@@ -84,21 +114,11 @@ describe('Basic replacements', function () {
         expect(result).toContain(`const foo = {Test: "lulz"};`)
     })
 
-    it('should not mess with imports', function () {
-        const result = concat(transform(`import { Test } from 'where-ever'`, { Test: 'baz' }))
-        expect(result).toContain(`import { Test } from 'where-ever'`)
-    })
-
-    it('should not mess with default imports', function () {
-        const result = concat(transform(`import * as Test from 'where-ever'`, { Test: 'baz' }))
-        expect(result).toContain(`import * as Test from 'where-ever'`)
-    })
-
     it('should not overwrite declared variables', function () {
         const result = concat(transform(`
             const Test = 'complex'
             const another = Test
-        `, { Test: 'baz' }, true))
+        `, { Test: 'baz' }))
 
         expect(result).toContain(`const Test = 'complex'`)
         expect(result).toContain(`const another = Test`)

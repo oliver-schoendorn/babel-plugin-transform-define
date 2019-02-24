@@ -1,15 +1,12 @@
-import { PluginObj, types as Types } from "babel-core"
-import { NodePath } from "babel-traverse"
+import { PluginObj, types as Types, Visitor } from 'babel-core'
+import { NodePath } from 'babel-traverse'
+import { DeclarationFactory } from './DeclarationFactory'
+import { DeclarationCache } from './DeclarationCache';
 
 interface Arguments
 {
     types: typeof Types
 }
-
-const isDeclaration = (path: NodePath): boolean =>
-    path.parentPath.isVariableDeclarator() ||
-    path.parentPath.parentPath.isVariableDeclarator() ||
-    path.parentPath.isSpreadElement()
 
 
 const debug = (node: NodePath) =>
@@ -20,6 +17,9 @@ const debug = (node: NodePath) =>
         parentParentType: node.parentPath.parentPath.type,
         isVariableDeclarator: node.parentPath.isVariableDeclarator(),
         isVariableDeclaration: node.parentPath.isVariableDeclaration(),
+        variableDeclarations: node.parentPath.parentPath.isVariableDeclaration()
+            ? node.parentPath.parentPath.node.declarations
+            : null,
         isDeclareVariable: node.parentPath.isDeclareVariable(),
         isReferenced: node.isReferenced(),
         isIdentifier: node.isIdentifier(),
@@ -27,96 +27,106 @@ const debug = (node: NodePath) =>
         isReferencedIdentifier: node.isReferencedIdentifier(),
         isAssignmentPattern: node.isAssignmentPattern(),
         isParentAssignmentPattern: node.parentPath.isAssignmentPattern(),
-        isAssignmentExpression: node.parentPath.isAssignmentExpression()
+        isAssignmentExpression: node.parentPath.isAssignmentExpression(),
+        isExportSpecifier: node.isExportSpecifier(),
+        isExportDeclaration: node.isExportDeclaration(),
+        isExportDefaultDeclaration: node.isExportDefaultDeclaration()
     }
 }
 
-interface PluginOptions
+const makeTraverser = (state: any, declarationFactory: DeclarationFactory): Visitor =>
 {
-    [key: string]: any
-}
+    const declarationCache = new DeclarationCache(declarationFactory, state.opts)
+    return {
+        Identifier(path, { opts }) {
+            // path.shouldSkip = false
+            if (! declarationCache.exists(path.node.name)) {
+                return
+            }
 
-let pluginOptions: object|null = null
-let pluginOptionKeys: string[]|null = null
-const pluginOptionsIncludeKey = (key: string|number, options: PluginOptions): key is keyof PluginOptions =>
-{
-    if (pluginOptions !== options) {
-        pluginOptions = options
-        pluginOptionKeys = Object.keys(options).filter(key => key !== '_debug')
+            if (opts._debug) {
+                console.log({
+                    traverse: 'TRAVERSER',
+                    variable: path.node.name,
+                    source: path.parentPath.getSource(),
+                    parentSource: path.parentPath.parentPath.getSource(),
+                    value: path.evaluate().value,
+                    ...debug(path)
+                })
+            }
+
+            // Todo: Refactor this (possibly with an iterator that walks up the node tree)
+            if (path.parentPath.isBinaryExpression()) {
+                path.replaceWith(declarationCache.get(path.node.name).value())
+                const value = path.parentPath.evaluate()
+                if (value.confident === true) {
+                    path.parentPath.replaceWith(declarationFactory.makeValue(value.value))
+
+                    if (path.parentPath.parentPath.isIfStatement()) {
+                        const parentIf = path.parentPath.parentPath
+                        const parentReplacement = value.value
+                            ? parentIf.node.consequent
+                            : parentIf.node.alternate
+
+                        if (parentReplacement) {
+                            parentIf.replaceWith(parentReplacement)
+                        }
+                        else {
+                            parentIf.remove()
+                        }
+                    }
+                }
+                return
+            }
+
+            if (path.isExportNamedDeclaration() || path.parentPath.isExportNamedDeclaration()) {
+                console.log('Maybe hit', {
+                    source: path.parentPath.parentPath.getSource()
+                })
+            }
+
+            if (path.parentPath.isExportSpecifier() && path.evaluate().value === undefined) {
+                path.parentPath.insertBefore(declarationCache.get(path.node.name).declaration())
+                path.stop()
+                return
+            }
+
+            if (path.isReferenced() && path.evaluate().value === undefined) {
+                path.replaceWith(declarationCache.get(path.node.name).value())
+            }
+        }
     }
-
-    return pluginOptionKeys.includes(key as string)
 }
 
-
-const Plugin: ((babel: Arguments) => PluginObj) = () =>
+const Plugin: ((babel: Arguments) => PluginObj) = function({ types })
 {
+    const declarationFactory = new DeclarationFactory(types)
     return {
         name: 'transform-define',
         visitor: {
-            AssignmentExpression(path) {
-                console.log("Assignment: " + path.node.left.type + " / " + path.node.right.type)
+            IfStatement(path, state) {
+                path.traverse(makeTraverser(state, declarationFactory), state)
             },
-            Identifier(path, { opts }) {
-                if (pluginOptionsIncludeKey(path.node.name, opts)) {
-                    const replacement = pluginOptions[path.node.name]
-
-                    if (opts._debug) {
-                        console.log({
-                            variable: path.node.name,
-                            source: path.parentPath.getSource(),
-                            value: path.evaluate().value,
-                            ...debug(path)
-                        })
+            MemberExpression(path, state) {
+                const declarationCache = new DeclarationCache(declarationFactory, state.opts)
+                declarationCache.getKeys().forEach(key => {
+                    if (path.matchesPattern(key) && path.evaluate().value === undefined) {
+                        path.replaceWith(declarationCache.get(key).value())
                     }
-
-                    if (isDeclaration(path) && path.isReferenced() && path.evaluate().value === undefined) {
-                        path.replaceWithSourceString(JSON.stringify(replacement))
-                        return
-                    }
-                }
-
-                // if (testVars.test(path.node.name)) {
-                //     console.log('==================')
-                //
-                //
-                //     if (isDeclaration(path) && path.isIdentifier() && path.isReferenced()) {
-                //         console.log({
-                //             replace: path.parentPath.getSource(),
-                //             self: path.getSource(),
-                //             type: path.type,
-                //             parentType: path.parentPath.type,
-                //             parentParentType: path.parentPath.parentPath.type,
-                //             parentParentParentType: path.parentPath.parentPath.parentPath.type,
-                //             opts
-                //         })
-                //         return
-                //     }
-                //
-                //     // else {
-                //         console.log({
-                //             source: path.parentPath.getSource(),
-                //             self: debug(path),
-                //             // parent: debug(path.parentPath)
-                //         })
-                //     // }
-                //
-                //
-                //     // const parentPath = node
-                //     // if (parentPath.isVariableDeclarator()) {
-                //     //     console.log('What the?', path.parent.type)
-                //     // }
-                //     // node.isDeclaration()
-                //     // console.log('DOOOOO STUFF: ' + node.type)
-                //     // path.traverse(identify)
-                // }
+                })
             },
-            // Declaration(path) {
-                // console.log('We have a declaration ' + path.node.type)
-                // if (path.isVariableDeclaration()) {
-                //     console.log(path.node.declarations)
-                // }
-            // }
+            ExportSpecifier(path, state) {
+                path.traverse(makeTraverser(state, declarationFactory), state)
+            },
+            ExpressionStatement(path, state) {
+                path.traverse(makeTraverser(state, declarationFactory), state)
+            },
+            ExportDefaultDeclaration(path, state) {
+                path.traverse(makeTraverser(state, declarationFactory), state)
+            },
+            VariableDeclaration(path, state) {
+                path.traverse(makeTraverser(state, declarationFactory), state)
+            }
         }
     }
 }
