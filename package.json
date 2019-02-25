@@ -1,6 +1,6 @@
 {
   "name": "@oliver-schoendorn/babel-plugin-transform-define",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "This babel plugin will take a set of config values (or load them from a file path) and replace all occurrences in the parsed scripts.",
   "keywords": [
     "babel",
@@ -9,6 +9,9 @@
   ],
   "repository": "github:oliver-schoendorn/babel-plugin-transform-define",
   "main": "dist/index.js",
+  "files": [
+    "dist/*"
+  ],
   "scripts": {
     "prepublishOnly": "npm run test && npm run build",
     "clear": "rimraf ./dist/**/*",
