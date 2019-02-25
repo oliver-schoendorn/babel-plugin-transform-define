@@ -1,9 +1,8 @@
-import { types as babelTypes } from 'babel-core'
-import { Expression, ObjectProperty, VariableDeclaration } from 'babel-types'
-
+import { Expression, ObjectProperty, Declaration } from 'babel-types'
+import * as babelTypes from 'babel-types'
 type Types = typeof babelTypes
 
-class DeclarationFactory
+class NodeFactory
 {
     private readonly types: Types
 
@@ -12,22 +11,7 @@ class DeclarationFactory
         this.types = types
     }
 
-    public makeValue = (value: any): Expression =>
-    {
-        return this.valueToExpression(value)
-    }
-
-    public makeDeclaration = (name: string, value: any, kind: 'var' | 'let' | 'const' = 'const'): VariableDeclaration =>
-    {
-        return this.types.variableDeclaration(kind, [
-            this.types.variableDeclarator(
-                this.types.identifier(name),
-                this.valueToExpression(value)
-            )
-        ])
-    }
-
-    private valueToExpression = (value: any): Expression =>
+    public expression = (value: any): Expression =>
     {
         const type = typeof value
 
@@ -39,7 +23,7 @@ class DeclarationFactory
             case type === 'string':     return this.types.stringLiteral(value)
 
             case value instanceof Array:
-                return this.types.arrayExpression(value.map(this.valueToExpression))
+                return this.types.arrayExpression(value.map(this.expression))
 
             case value.toString() === '[object Object]':
                 return this.types.objectExpression(
@@ -54,16 +38,26 @@ class DeclarationFactory
         }
     }
 
-    private getObjectProperties = (object: { [key in string | number]: any }): ObjectProperty[] =>
+    public declaration = (name: string, value: any, kind: 'var' | 'let' | 'const' = 'const'): Declaration =>
+    {
+        return this.types.variableDeclaration(kind, [
+            this.types.variableDeclarator(
+                this.types.identifier(name),
+                this.expression(value)
+            )
+        ])
+    }
+
+    private getObjectProperties = (object: { [key in string]: any }): ObjectProperty[] =>
     {
         return Object.entries(object).reduce<ObjectProperty[]>((reducer, [ key, value ]) => {
             reducer.push(this.types.objectProperty(
-                this.valueToExpression(key),
-                this.valueToExpression(value),
+                this.expression(key),
+                this.expression(value),
             ))
             return reducer
         }, [])
     }
 }
 
-export { DeclarationFactory }
+export { NodeFactory }

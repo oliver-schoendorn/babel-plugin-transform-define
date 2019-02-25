@@ -25,7 +25,8 @@ describe('Export Tests', function () {
 
     it('should replace default export declaration', function () {
         const result = concat(transform(`export default Test`, { Test: { foo: 'bar' } }))
-        expect(result).toContain(`export default {"foo": "bar"};`)
+        expect(result).toContain(`const Test = {"foo": "bar"};`)
+        expect(result).toContain(`export default Test;`)
     })
 
     it('should not overwrite defined exports', function () {

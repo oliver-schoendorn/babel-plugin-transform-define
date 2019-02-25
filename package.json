@@ -1,15 +1,17 @@
 {
   "name": "@oliver-schoendorn/babel-plugin-transform-define",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0",
+  "description": "This babel plugin will take a set of config values (or load them from a file path) and replace all occurrences in the parsed scripts.",
   "keywords": [
     "babel",
     "plugin",
     "define"
   ],
+  "repository": "github:oliver-schoendorn/babel-plugin-transform-define",
   "main": "dist/index.js",
   "scripts": {
-    "build": "babel ./src -d ./dist --extensions \".ts\"",
+    "clear": "rimraf ./dist/**/*",
+    "build": "npm run clear && babel ./src -d ./dist --extensions \".ts\"",
     "build:dev": "NODE_ENV=test npm run build",
     "test": "NODE_ENV=test npm run build && jest --coverage"
   },
@@ -29,10 +31,7 @@
     "collectCoverageFrom": [
       "./dist/**/*.js",
       "!**/node_modules/**"
-    ],
-    "globals": {
-      "NODE_ENV": "test"
-    }
+    ]
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -49,6 +48,7 @@
     "@types/node": "^11.9.4",
     "coveralls": "^3.0.3",
     "jest": "^24.1.0",
+    "rimraf": "^2.6.3",
     "uuid": "^3.3.2"
   },
   "peerDependencies": {

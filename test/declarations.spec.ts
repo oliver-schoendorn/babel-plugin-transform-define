@@ -68,6 +68,15 @@ describe('Declaration Tests', function () {
         )
     })
 
+    it('should handle property assignments', function () {
+        const result = concat(transform(`
+                const VAR = { some: 'thing', TEST }
+            `,
+            { TEST: { variable: 'string' }, VAR: { lol: true } }
+        ))
+        expect(result).toContain(`const VAR = {some: 'thing', TEST: {"variable": "string"}};`)
+    })
+
     it('should handle spreads', function () {
         const result = concat(transform(`
                 const VAR = { some: 'thing' }
@@ -122,5 +131,14 @@ describe('Declaration Tests', function () {
 
         expect(result).toContain(`const Test = 'complex'`)
         expect(result).toContain(`const another = Test`)
+    })
+
+    it('should punish developers who don\'t RTFM', function () {
+        expect(
+            () => transform(
+                `const test = MY_FN`,
+                { MY_FN: () => 'lol' }
+                )
+        ).toThrow(/^\[babel-plugin-transform-define\]/i)
     })
 })
