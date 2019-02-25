@@ -10,6 +10,7 @@
   "repository": "github:oliver-schoendorn/babel-plugin-transform-define",
   "main": "dist/index.js",
   "scripts": {
+    "prepublishOnly": "npm run test && npm run build",
     "clear": "rimraf ./dist/**/*",
     "build": "npm run clear && babel ./src -d ./dist --extensions \".ts\"",
     "build:dev": "NODE_ENV=test npm run build",

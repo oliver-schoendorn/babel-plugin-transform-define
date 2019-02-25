@@ -74,7 +74,7 @@ describe('Declaration Tests', function () {
             `,
             { TEST: { variable: 'string' }, VAR: { lol: true } }
         ))
-        expect(result).toContain(`const VAR = {some: 'thing', TEST: {"variable": "string"}};`)
+        expect(result).toContain(`const VAR = {some: 'thing',TEST: {"variable": "string"}};`)
     })
 
     it('should handle spreads', function () {
