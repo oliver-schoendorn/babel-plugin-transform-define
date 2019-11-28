@@ -139,6 +139,6 @@ describe('Declaration Tests', function () {
                 `const test = MY_FN`,
                 { MY_FN: () => 'lol' }
                 )
-        ).toThrow(/^\[babel-plugin-transform-define\]/i)
+        ).toThrow(/\[babel-plugin-transform-define\]/i)
     })
 })

@@ -7,7 +7,9 @@ export const transform = (
     debug: boolean = false,
     additionalOptions: Partial<Options> = {}
 ): string =>
-    babelTransform(sourceCode, { plugins: [[ './dist/index.js', Object.assign<Options>({},
+    babelTransform(sourceCode, {
+        parserOpts: { allowUndeclaredExports: true },
+        plugins: [[ './dist/index.js', Object.assign({},
             { values: replacements },
             { verbose: debug ? true : undefined },
             additionalOptions

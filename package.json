@@ -1,6 +1,6 @@
 {
   "name": "@oliver-schoendorn/babel-plugin-transform-define",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "description": "This babel plugin will take a set of config values (or load them from a file path) and replace all occurrences in the parsed scripts.",
   "keywords": [
     "babel",
@@ -38,22 +38,23 @@
     ]
   },
   "devDependencies": {
-    "@babel/cli": "^7.2.3",
-    "@babel/core": "^7.3.3",
-    "@babel/plugin-proposal-class-properties": "^7.3.3",
-    "@babel/polyfill": "^7.2.5",
-    "@babel/preset-env": "^7.3.1",
-    "@babel/preset-typescript": "^7.3.3",
-    "@babel/traverse": "^7.2.3",
+    "@babel/cli": "^7.7.4",
+    "@babel/core": "^7.7.4",
+    "@babel/plugin-proposal-class-properties": "^7.7.4",
+    "@babel/polyfill": "^7.7.0",
+    "@babel/preset-env": "^7.7.4",
+    "@babel/preset-typescript": "^7.7.4",
+    "@babel/traverse": "^7.7.4",
     "@types/babel-core": "^6.25.6",
     "@types/babel-traverse": "^6.25.5",
-    "@types/babel-types": "^7.0.5",
-    "@types/jest": "^24.0.6",
-    "@types/node": "^11.9.4",
-    "coveralls": "^3.0.3",
-    "jest": "^24.1.0",
-    "rimraf": "^2.6.3",
-    "uuid": "^3.3.2"
+    "@types/babel-types": "^7.0.7",
+    "@types/jest": "^24.0.23",
+    "@types/node": "^11.15.3",
+    "core-js": "^2.6.10",
+    "coveralls": "^3.0.9",
+    "jest": "^24.9.0",
+    "rimraf": "^2.7.1",
+    "uuid": "^3.3.3"
   },
   "peerDependencies": {
     "@babel/core": "^7.0.0-0"
